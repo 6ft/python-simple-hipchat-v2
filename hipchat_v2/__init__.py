@@ -1,10 +1,8 @@
 try:
     from urllib.parse import urljoin
-    from urllib.parse import urlencode
     import urllib.request as urlrequest
 except ImportError:
     from urlparse import urljoin
-    from urllib import urlencode
     import urllib2 as urlrequest
 import json
 
@@ -32,13 +30,13 @@ class HipChat(object):
     def method(self, url, method='POST', headers={}, data=None, timeout=None):
         method_url = urljoin(self.url, url)
         req = self.RequestWithMethod(method_url, http_method=method, headers=headers, data=data)
-        response = self.opener.open(req, None, timeout).read()
+        self.opener.open(req, None, timeout).read()
 
-    def message_room(self, room_id='', message='', message_format='text', color='', notify=False, token=''):
-        url = 'v2/room/%d/notification' % room_id
+    def message_room(self, room_id='', message='', message_format='text', color='', notify=False, token='', message_from='me'):
+        url = 'v2/room/{}/notification'.format(room_id)
         headers = {
               "content-type": "application/json",
-              "authorization": "Bearer %s" % token
+              "authorization": "Bearer {}".format(token)
         }
 
         data = json.dumps({
@@ -46,7 +44,7 @@ class HipChat(object):
           'color': color,
           'message_format': message_format,
           'notify': notify,
-          'from': 'me'
+          'from': message_from,
         })
 
-        return self.method(url, headers=headers, data=data)
+        return self.method(url, headers=headers, data=data.encode('utf-8'))
